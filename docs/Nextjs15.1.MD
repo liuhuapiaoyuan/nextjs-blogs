@@ -1,4 +1,4 @@
-# 详细解析Next.js 15.1 的更新特性
+# 你应该了解的Next.js15的新特性
 
 本文不直接翻译blog中的更新日志，而是重点讲解一下本次更新带来的新特性。
 
@@ -67,7 +67,7 @@ const [optimisticState, addOptimistic] = useOptimistic(
   (currentState, newValue) => {
     // 更新函数可以把新的的数据更新到state
     // 当异步操作接受后，state会被回滚
-    // 特别适合比如聊天，发布文章，可以先发布一个sending状态的消息
+    // 特别适合比如聊天，发布消息，可以先发布一个sending状态的消息
   }
 );
 ```
@@ -176,6 +176,34 @@ export default function Forbidden() {
 
 4. <span style="color: red;">缓存标签</span>
    `cacheTag` 和 `revalidateTag` 的引入让缓存管理变得更加灵活。我们可以给缓存打上标签，然后通过这些标签来精确控制哪些缓存需要重新验证。这对于管理大型应用的缓存策略来说，简直是福音。
+
+5. 案例代码：
+```typescript
+// 函数/组件缓存案例
+export async function Bookings({ type = 'haircut' }: BookingsProps) {  
+  'use cache'
+  cacheTag("bookings")
+  
+  async function getBookingsData() {
+    const data = await fetch(`/api/bookings?type=${encodeURIComponent(type)}`)
+    return data
+  }
+  
+  const bookings = await getBookingsData()
+  return <BookingList data={bookings} />
+}
+
+// revalidateTag案例
+export async function handleBookingChange(formData: FormData) {
+  'use server'
+  const bookingId = formData.get('bookingId')
+  const newStatus = formData.get('status')
+  await updateBookingStatus(bookingId, newStatus)
+  revalidateTag('bookings')
+}
+
+```
+
 
 虽然 `use cache` 还在实验阶段，但我已经迫不及待想在下一个项目中尝试了。它有助于解决了我们长期以来对 Next.js 缓存管理的困扰，让我们能够更好地掌控应用的性能和数据新鲜度。
 
