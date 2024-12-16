@@ -1,0 +1,30 @@
+sequenceDiagram
+    participant 用户
+    participant "WEB 浏览器"
+    participant 服务端
+    participant 公众号
+
+    用户 ->> "WEB 浏览器": 点击登录
+    "WEB 浏览器" ->> 服务端: 获取公众号登录凭证 (ticket)
+
+    alt 服务端获取AccessToken
+        服务端 ->> 服务端: 获取 AccessToken
+        服务端 ->> 公众号: 创建 AccessToken
+        公众号 -->> 服务端: return
+    end
+
+    服务端 ->> 服务端: 获取 Ticket 凭证
+    服务端 ->> 公众号: dispatch
+    公众号 -->> 服务端: return
+    服务端 -->> "WEB 浏览器": return
+
+    "WEB 浏览器" ->> 服务端: 使用 Ticket 换取二维码
+    服务端 ->> 公众号: 创建二维码
+    公众号 -->> 服务端: return
+    服务端 -->> "WEB 浏览器": return
+
+    用户 ->> "WEB 浏览器": 扫码登录
+    "WEB 浏览器" ->> 服务端: 扫码后，公众号回调
+    服务端 ->> 公众号: 绑定 openid + ticket
+    服务端 ->> 服务端: 轮询登录检查
+    服务端 -->> "WEB 浏览器": 校验成功，获取 Token

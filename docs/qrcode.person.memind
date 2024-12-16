@@ -1,0 +1,18 @@
+sequenceDiagram
+    participant 用户
+    participant "WEB 浏览器"
+    participant 服务端
+    participant 公众号
+
+    用户 ->> "WEB 浏览器": 点击登录
+    "WEB 浏览器" ->> 服务端: 创建登录验证码 (captcha)
+
+    服务端 ->> "WEB 浏览器": 展示公众号关注二维码，展示验证码(captcha)
+ 
+
+    用户 ->> "WEB 浏览器": 扫码关注公众号
+    用户 ->> 公众号: 发送 验证码 
+    服务端 ->> 服务端: 轮询登录检查
+    公众号 ->> 服务端: 发送验证码后，公众号回调webhook
+    服务端 ->> 服务端: 解析消息，确定验证码，并绑定 openid
+    服务端 -->> "WEB 浏览器": 登录成功
